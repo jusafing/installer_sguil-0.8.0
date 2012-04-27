@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# $Id: sguild,v 1.5 2008/03/07 19:42:21 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+# chkconfig: 2345 80 13
+# description: Starts and stops SGUIL security monitoring server. \
+
+# Source function library.
+#. /etc/init.d/functions
+
+# Source networking configuration.
+#. /etc/sysconfig/network
+
+# Check that networking is up.
+#[ ${NETWORKING} = "no" ] && exit 0
+
+sguild="/usr/local/sguil-0.7.0/server/sguild -c /nsm/etc/sguild.conf -A /nsm/etc/sguild.access -a /nsm/etc/autocat.conf -g /nsm/etc/sguild.queries -P /var/run/sguil/sguild.pid -C /nsm/etc/certs -D -l /usr/local/sguil-0.7.0/server/lib"
+prog="sguild"
+sguil_user="sguil"
+
+start() {
+    echo -n $"Starting $prog: "
+    RETVAL=0
+    su $sguil_user -c "$sguild"
+
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    kill -9 `ps auxww | grep tclsh | grep sguild | awk '{print $2}'`
+    echo
+}
+
+status() {
+    NUM_PROCS=`ps auxww | grep tclsh | grep sguild | grep -v grep | awk '{print $2}' | wc -l`
+
+    if [ $NUM_PROCS -eq 3 ]; then
+        echo "Sguild daemon is UP"
+        exit 0
+    else
+	# The funky sed is necessary to chop some extra spaces before 
+	# $NUM_PROCS, which were inserted by the output from "wc -l" above.
+        echo "Sguild daemon is DOWN ($NUM_PROCS/3 processes up)" | sed -e 's/\s\s//g'
+        exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	sleep 3
+	start
+	;;
+  status)
+	status 
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+

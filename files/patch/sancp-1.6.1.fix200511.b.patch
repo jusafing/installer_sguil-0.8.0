@@ -1,0 +1,23 @@
+diff -U3 -d sancp-1.6.1/decode.cc sancp-1.6.1.fix200511.b/decode.cc
+--- sancp-1.6.1/decode.cc	2004-09-13 12:04:57.000000000 -0400
++++ sancp-1.6.1.fix200511.b/decode.cc	2005-11-12 21:34:48.676446407 -0500
+@@ -15,7 +15,6 @@
+  * *
+  * ***********************************************************************/
+ 
+-
+ void decode(struct cnx* nc, int len, const u_char *pkt )
+ {
+ 	extern struct gvars gVars;
+@@ -66,10 +65,9 @@
+ 			{
+ 				nc->os_info.ttl=(u_int8_t)pkt[e_hlen+8];
+ 				nc->os_info.len=ip_len;
+-				nc->os_info.wss=ntohs(*(u_int16_t*)(pkt + e_hlen + ip_hlen + 28));
++				nc->os_info.wss=ntohs(*(u_int16_t*)(pkt + e_hlen + ip_hlen + 14));
+ 				nc->os_info.df=((pkt[e_hlen + 6]&0x40)==0x40)?1:0;
+ 				nc->os_info.wscale=0;
+-				//tcpopt = *pkt + (e_hlen + ip_hlen + 20);
+ 				int tcpoptctr=(e_hlen + ip_hlen + 20);
+ 				
+ 				tcpoptlen=tcp_hlen>20?(tcp_hlen - 20):0;

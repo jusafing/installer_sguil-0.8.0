@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+#
+# $Id: pads-sensor,v 1.3 2007/06/07 14:47:08 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# pads	   start and stop PADS sensor
+#
+# chkconfig: 345 81 14
+# description: start and stop PADS sensor
+
+PATH=/sbin:/bin:/usr/bin:/usr/sbin
+
+# Source function library.
+#. /etc/init.d/functions
+
+# The name of this sensor.  Edit this!
+SENSOR=agente1
+
+# The location of the local storage directory.  Edit this!
+NSMDIR=/nsm
+
+RETVAL=0
+
+PADS="/usr/local/bin/pads -c /nsm/etc/pads_$SENSOR.conf -u sguil -g sguil"
+
+start(){
+   echo -n "Starting PADS: "
+
+    $PADS
+    RETVAL=$?
+    echo
+    # Make sure our FIFO is readable by the sguil user
+    chown -R  sguil.sguil $NSMDIR/$SENSOR/pads.fifo
+    return $RETVAL
+}
+
+stop(){
+    echo -n "Stopping PADS: "
+    kill -9 `ps auxww | grep pads | grep pads_$SENSOR.conf | grep -v grep | awk '{print $2}'`
+    RETVAL=$?
+    echo
+    return $RETVAL
+
+}
+
+restart(){
+    stop
+    start
+}
+
+status() {
+    PID=`ps auxww | grep pads | grep pads_$SENSOR.conf | grep -v grep | awk '{print $2}'`
+    if [ "x$PID" != "x" ]; then
+	echo "PADS for sensor $SENSOR is UP (pid $PID)"
+	exit 0
+    else
+	echo "PADS for sensor $SENSOR is DOWN"
+	exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;
+    status)
+	status $prog
+	;;
+    restart)
+	restart
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|status|restart}"
+	RETVAL=1
+esac
+
+exit $RETVAL

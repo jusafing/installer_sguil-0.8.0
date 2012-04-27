@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# $Id: sguil_logger-sensor,v 1.3 2006/11/10 16:24:23 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+# chkconfig: 2345 82 15
+# description: Starts and stops SGUIL packet logger. \
+
+# Source function library.
+#. /etc/init.d/functions
+
+# Source networking configuration.
+#. /etc/sysconfig/network
+
+# Check that networking is up.
+#[ ${NETWORKING} = "no" ] && exit 0
+
+# The name of this sensor.  Edit this!
+SENSOR=agente1
+
+sguil_logger="/nsm/scripts/log_packets.sh"
+prog="log_packets.sh"
+PIDFILE=/var/run/snort_log-$SENSOR.pid
+start() {
+    echo -n $"Starting $prog: "
+    /bin/rm -f $PIDFILE
+    RETVAL=0
+    $sguil_logger start
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    $sguil_logger stop
+    echo
+}
+
+restart() {
+    echo -n $"Restarting $prog: "
+    $sguil_logger restart
+    echo
+}
+
+status() {
+    PID=`ps auxww | grep -i snort | grep $SENSOR/dailylogs | grep -v grep | awk '{print $2}'`
+    if [ "x$PID" != "x" ]; then
+	echo "Packet logger for sensor $SENSOR is UP (pid $PID)"
+	exit 0
+    else
+	echo "Packet logger for sensor $SENSOR is DOWN"
+	exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	restart
+	;;
+  status)
+	status 
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+

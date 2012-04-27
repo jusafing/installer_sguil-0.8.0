@@ -1,1 +1,162 @@
-Sguil 0.8.0 Installer Repository
+##############################################################################
+## This file is free software; as a special exception the author gives      ##
+## unlimited permission to copy and/or distribute it, with or without	    ##
+## modifications, as long as this notice is preserved.			    ##
+##									    ##
+## This program is distributed in the hope that it will be useful, but	    ##
+## WITHOUT ANY WARRANTY, to the extent permitted by law; without even the   ##
+## implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. ##
+##									    ##
+##############################################################################
+## Honeynet Project UNAM-Chapter					    ##
+## SSI/UNAM-CERT							    ##
+## honeynet@seguridad.unam.mx						    ##
+## www.seguridad.unam.mx/www.cert.org.mx/www.honeynet.unam.mx		    ##
+## ------------------------------------------------------------------------ ##
+##############################################################################
+
+##############################################################################
+## Installation script Sguil 0.8.0 on Debian GNU/Linux 6.0 Base  V0.2.0     ##
+## By [Javier Santillan] [jsantillan@seguridad.unam.mx, jusafing@gmail.com] ##
+## Date [2012-04-18]							    ##
+##############################################################################
+
+--------------
+1. DESCRIPTION
+
+	This script is an installer of Sguil 0.8.0 server/sensor.              
+	Compiles source code tools and install some Debian packages in order to
+	prepare a Debian base system as a network traffic analyzer with server
+	and sensor in the same machine. You just need a sguil client v0.8.0
+	to connect to the analyzer.
+
+	The following schema represents how the analyzer works itself.
+
+
+                                                           -------- Traffic
+                                                           |        eth0
+       	 ______________                ____________________|______
+	|              |              |                           |    
+	| Sguil Client | -----------> |   Server / Sensor         |--- MGT iface
+	|______________|              |___________________________|    eth1
+                                                                      (optional)
+
+	## Sguil client	             ## Sguild daemon ##
+	./sguil.tk                   /etc/init.d/sguild              start/stop
+				     ## Agent daemons ##
+				     /etc/init.d/sancp_agent-sensor  start/stop
+				     /etc/init.d/pads_agent-sensor   start/stop
+				     /etc/init.d/pcap_agent-sensor   start/stop
+				     /etc/init.d/snort_agent-sensor  start/stop
+				     /etc/init.d/sguil_logger-sensor start/stop
+
+				     ## Sensor daemons ##
+				     /etc/init.d/snort-sensor        start/stop
+				     /etc/init.d/pads-sensor         start/stop
+				     /etc/init.d/barnyard-sensor     start/stop
+				     /etc/init.d/sancp-sensor        start/stop
+
+
+	The script installs the following tools and packages:
+
+        - apt packages: build-essential libncurses5-dev automake autoconf flex 
+                        bison byacc libpcre3 libpcre3-dev zlib1g-dev
+			mysql-server-5.1 p0f libmysqlclient15-dev
+        - tcl
+        - tcllib
+        - openssl
+        - tls
+        - libpcap
+        - libnet
+        - libdnet
+        - daq
+        - snort
+        - pads
+        - sancp
+        - sguil
+        - barnyard
+        - mysqltcl
+        - tcpflow
+        - tclx
+        - tcpdump
+        - rules_snort (VRT & Emerging)
+        - mysql
+
+        ************************************************************************
+	* You can define the version of each tool, but you may need to change  *
+	* some lines in the script in order to specify different compilation   *
+	* options.   							       *
+	* All the versions defined in the current version of the script have   *
+	* been tested succesfully.                                             *	************************************************************************
+
+	The structure of the directory is:
+
+	/nsm
+	  |
+	  |--- archive   > Traffic Log directory
+          |--- etc       > Configuration files
+          |--- load      >
+	  |--- mysql     > MySQL directory
+	  |--- rules     > Snort rules
+	  |--- scripts   > All scripts used by server/sensor
+
+	
+	** NOTES **
+
+	- Once the script have been executed, you can change Snort rules.
+	  This installer includes the VRT snort rules snapshot 2922.
+
+	- You can change mysql password as well.
+
+
+---------------
+2. REQUIREMENTS
+
+	- Debian GNU/Linux 6.0.x Base Installation
+	- Since the script will try to download and intall some debian packages,
+          you need to update the source repositories and available Internet 
+	  connection during the installation process.
+	- sh/bash
+
+---------------
+3. INSTALLATION
+
+	The installation process is quite easy...
+
+	You just need to specify the name of the sensor:
+	
+	Example:
+
+	./install.sh morris
+
+	** IMPORTANT **
+
+	- During the installation process you can verify and change the name of
+	  the sensor and the monitoring interface.
+
+	- You can see the installation log DURING or AFTER the process.
+	  The LOG file is INSTALL_LOG and its located in the same directory.
+
+------------
+4. EXECUTION
+
+	If there were no errors during the installation process, you can:
+
+	1) Restart the system.All services and process will start automatically.
+	2) Use /etc/init.d/analyzer to START/STOP/RESTART all services.
+
+
+------
+5.TODO
+
+	- There is a lack of validations in the scripts... :s
+	- If the script encounter some error in the installation process, 
+	  you may need to run it again, or change the script to run it from
+	  specific function.
+
+
+----------
+6. CONTACT
+
+	Bugs, comments, ...
+	jusafing@gmail.com

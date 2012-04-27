@@ -1,0 +1,73 @@
+#!/bin/bash
+
+start()
+{
+	# Sguild daemon
+	/etc/init.d/sguild              start
+
+	# Agent daemons
+	/etc/init.d/sancp_agent-sensor  start
+	/etc/init.d/pads_agent-sensor   start
+	/etc/init.d/pcap_agent-sensor   start
+	/etc/init.d/snort_agent-sensor  start
+	/etc/init.d/sguil_logger-sensor start
+	
+	# Sensor daemons
+	/etc/init.d/snort-sensor        start
+	/etc/init.d/pads-sensor         start
+	/etc/init.d/barnyard-sensor     start
+	/etc/init.d/sancp-sensor        start
+}
+
+stop()
+{
+	/etc/init.d/sguild              stop
+
+	/etc/init.d/barnyard-sensor     stop
+	/etc/init.d/sancp-sensor        stop
+	/etc/init.d/sancp_agent-sensor  stop
+	/etc/init.d/pads_agent-sensor   stop
+	/etc/init.d/pcap_agent-sensor   stop
+	/etc/init.d/snort_agent-sensor  stop
+	/etc/init.d/sguil_logger-sensor stop
+	/etc/init.d/snort-sensor        stop
+	/etc/init.d/pads-sensor         stop
+}
+
+restart()
+{	
+	# Sguild daemon
+	/etc/init.d/sguild              restart
+	
+	# Agent daemons
+	/etc/init.d/sancp_agent-sensor  restart
+	/etc/init.d/pads_agent-sensor   restart
+	/etc/init.d/pcap_agent-sensor   restart
+	/etc/init.d/snort_agent-sensor  restart
+	/etc/init.d/sguil_logger-sensor restart
+	
+	# Sensor daemons
+	/etc/init.d/snort-sensor        restart
+	/etc/init.d/pads-sensor         restart
+	/etc/init.d/barnyard-sensor     restart
+	/etc/init.d/sancp-sensor        restart
+}
+
+# See how we were called.
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        RETVAL=1
+esac
+
+exit $RETVAL
+

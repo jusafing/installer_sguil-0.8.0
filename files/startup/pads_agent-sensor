@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# $Id: pads_agent-sensor,v 1.1 2007/06/04 16:52:20 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+# chkconfig: 2345 82 17
+# description: Starts and stops SGUIL PADS agent. \
+
+# Source function library.
+#. /etc/init.d/functions
+
+# Source networking configuration.
+#. /etc/sysconfig/network
+
+# Check that networking is up.
+#[ ${NETWORKING} = "no" ] && exit 0
+
+# The name of this sensor.  Edit this!
+SENSOR=agente1
+
+sensor_agent="/usr/local/sguil-0.7.0/sensor/pads_agent.tcl -D -c /nsm/etc/pads_agent.conf -O /usr/local/lib/tls1.6/libtls1.6.so"
+prog="pads_agent"
+
+start() {
+    echo -n $"Starting $prog: "
+    RETVAL=0
+    $sensor_agent
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    kill -9 `ps auxww | grep tclsh | grep pads_agent.tcl | grep pads_agent.conf | grep -v grep | awk '{print $2}'`
+    echo
+}
+
+status() {
+    PID=`ps auxww | grep tclsh | grep pads_agent.tcl | grep pads_agent.conf | grep -v grep | awk '{print $2}'`
+    if [ "x$PID" != "x" ]; then
+	echo "PADS agent for sensor $SENSOR is UP (pid $PID)"
+	exit 0
+    else
+	echo "PADS agent for sensor $SENSOR is DOWN"
+	exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	sleep 3
+	start
+	;;
+  status)
+	status
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+

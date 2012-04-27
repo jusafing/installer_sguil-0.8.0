@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# $Id: barnyard-sensor,v 1.3 2006/11/10 16:24:23 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+# chkconfig: 2345 83 16
+# description: Starts and stops SGUIL packet logger. \
+
+# Source function library.
+#. /etc/init.d/functions
+
+# Source networking configuration.
+#. /etc/sysconfig/network
+
+# The name of this sensor.  Edit this!
+SENSOR=agente1
+
+# The location of the Snort log directory.  
+SNORTLOG=/var/log/
+
+
+# Check that networking is up.
+#[ ${NETWORKING} = "no" ] && exit 0
+#barnyard="/usr/local/bin/barnyard -c /nsm/etc/barnyard.conf -g /nsm/etc/gen-msg.map -s /nsm/etc/sid-msg.map -f /nsm/etc/snort.log -w $SNORTLOG/waldo.file -p /nsm/etc/classification.config -X /var/run/sguil/barnyard-$SENSOR.pid -L $SNORTLOG -a $SNORTLOG/OLD -d $SNORTLOG -D"
+prog="barnyard"
+sguil_user="sguil"
+
+start() {
+    echo -n $"Starting $prog: "
+    RETVAL=0
+    su $sguil_user -c "/nsm/scripts/barnyard_start.sh"
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    kill -9 `ps auxww | grep -i barnyard.conf | grep -v grep | awk '{print $2}'`
+    echo
+}
+
+status() {
+    PID=`ps auxww | grep -i barnyard.conf | grep -v grep | awk '{print $2}'`
+    if [ "x$PID" != "x" ]; then
+	echo "Barnyard for sensor $SENSOR is UP (pid $PID)"
+	exit 0
+    else
+	echo "Barnyard for sensor $SENSOR is DOWN"
+	exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	sleep 3
+	start
+	;;
+  status)
+	status
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+

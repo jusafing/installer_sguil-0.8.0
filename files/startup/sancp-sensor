@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# $Id: sancp-sensor,v 1.6 2007/10/29 17:41:12 hanashi Exp $
+#
+# Copyright (C) 2005, David J. Bianco <david@vorant.com>
+#
+# This program is distributed under the terms of version 1.0 of the
+# Q Public License.  See LICENSE.QPL for further details.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+# chkconfig: 2345 85 17
+# description: Starts and stops SANCP server (part of the SGUIL software). \
+
+# Source function library.
+#. /etc/init.d/functions
+
+# Source networking configuration.
+#. /etc/sysconfig/network
+
+# Check that networking is up.
+#[ ${NETWORKING} = "no" ] && exit 0
+
+# The name of this sensor.  Edit this!
+SENSOR=agente1
+
+# The network interface to monitor (eg, eth2, bond0, etc).  Edit this!
+IFACE=eth0
+
+# The location of the local storage directory.  Edit this!
+NSMDIR=/nsm
+
+# If you happen to be monitoring a link with 802.1q VLAN tags (like a 
+# VLAN trunk line between two switches), uncomment this line.  It includes
+# the option that sets up the proper BPF filter to capture the tagged packets 
+# instead of untagged packets.  If you're using a version of SANCP prior to
+# 1.6.2, this option should be called "--strip-80211" (yeah, wrong name, I 
+# know, but it's correct).
+#
+#VLAN="--strip-80211"
+
+sancp="/usr/local/bin/sancp -d $NSMDIR/$SENSOR/sancp -i $IFACE -u sguil -g sguil -c /nsm/etc/sancp.conf -D $VLAN"
+
+prog="sancp"
+
+start() {
+    echo -n $"Starting $prog: "
+    RETVAL=0
+    $sancp
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    kill -9 `ps auxww | grep '/usr/local/bin/sancp' | grep $SENSOR | grep -v grep | awk '{print $2}'`
+    echo
+}
+
+status() {
+    PID=`ps auxww | grep '/usr/local/bin/sancp' | grep $SENSOR | grep -v grep | awk '{print $2}'`
+    if [ "x$PID" != "x" ]; then
+	echo "SANCP for sensor $SENSOR is UP (pid $PID)"
+	exit 0
+    else
+	echo "SANCP for sensor $SENSOR is DOWN"
+	exit -1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	sleep 3
+	start
+	;;
+  status)
+	status
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+

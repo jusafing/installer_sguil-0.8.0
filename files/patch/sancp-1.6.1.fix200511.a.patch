@@ -1,0 +1,20 @@
+diff -U3 -d sancp-1.6.1/check_packet.cc sancp-1.6.1.fix200511.a/check_packet.cc
+--- sancp-1.6.1/check_packet.cc	2004-09-02 11:06:36.000000000 -0400
++++ sancp-1.6.1.fix200511.a/check_packet.cc	2005-11-12 20:42:35.730815594 -0500
+@@ -184,10 +184,12 @@
+ 		nc->cid+=gVars.timeptr.tv_usec;
+ 
+ 		// Let's make certain we have a unique connection id 
+-		if(gVars.cnx_id>nc->cid){
+-			nc->cid=gVars.cnx_id++;
+-		}
+-		gVars.cnx_id=nc->cid;
++		if(nc->cid<=gVars.cnx_id){
++			gVars.cnx_id++;
++			nc->cid=gVars.cnx_id;
++		}else{
++		        gVars.cnx_id=nc->cid;
++                }
+ 		nc->fH=0;
+ 
+ 		// Now we are ready to apply the rule, based on it's [perceived] direction
